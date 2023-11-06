@@ -1,0 +1,1374 @@
+############################################################# Assignment 1 = Data Preparation ######################################################################
+# to perform structural data analysis
+import pandas as pd
+
+df = pd.read_csv("/content/Heart.csv")
+
+df.head()
+
+df.shape
+
+# finding missing value
+df.isnull()
+
+df.isnull().sum()
+
+# datatypes of each column
+df.dtypes
+
+# find out zeros
+df == 0
+
+df[df==0].count()
+
+df.columns
+
+# finding mean
+df['Age'].mean()
+
+# This is called label based slicing
+newdf = df[['Age', 'Sex', 'ChestPain', 'RestBP', 'Chol']]
+
+print(newdf)
+
+# performing cross validation
+# training and testing
+
+from sklearn.model_selection import train_test_split
+
+train, test = train_test_split(df, random_state=0, train_size=0.75)
+
+train.shape
+
+test.shape
+
+import numpy as np
+
+actual = np.concatenate((np.ones(45),np.zeros(450),np.ones(5)))
+
+print(actual)
+
+predicted = np.concatenate((np.ones(100),np.zeros(400)))
+
+print(predicted)
+
+# displaying confusion matrix
+from sklearn.metrics import ConfusionMatrixDisplay
+
+ConfusionMatrixDisplay.from_predictions(actual, predicted)
+
+# importing lib for calculation
+  # Accuracy
+  # Precision
+  # Recall
+  # F-1 score
+from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
+
+print(classification_report(actual, predicted))
+
+accuracy_score(actual,predicted)
+
+
+
+############################################################# Assignment 2 = Regression Temperature ##############################################################
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df = pd.read_csv("/content/temperatures.csv")
+
+df.shape
+
+df.dtypes
+
+df.isnull().sum()
+
+df.columns
+
+# input data
+x = df['YEAR']
+
+# output data
+y = df['ANNUAL']
+# y = df['JAN']
+
+# plt.figure(figsize=(10,7))
+print("Temperature of INDIA")
+plt.xlabel('- YEAR -') # x-axis
+plt.ylabel('- ANNUAL Temperature -') # y-axix
+plt.scatter(x,y)
+
+# there must be at least a single colum for it we are reshaping it
+x.shape
+
+x = x.values
+
+x = x.reshape(117,1)
+
+x.shape
+
+from sklearn.linear_model import LinearRegression
+
+regressor = LinearRegression()
+
+# for training algorithm 'fit' method is used
+# slope 'm'
+regressor.fit(x,y)
+
+# this is 'm' value from equation 'Y = mX + C'
+regressor.coef_
+
+# this is 'c' value from equation 'Y = mX + C'
+# intercept 'c'
+regressor.intercept_
+
+regressor.predict([[2023]])
+
+predicted = regressor.predict(x)
+
+predicted
+
+y
+
+# Difference between actual and predicted is called MAE
+import numpy as np
+
+abs(y - predicted)
+
+np.mean(abs(y - predicted))
+
+# we can also use lib for calculating MAE
+from sklearn.metrics import mean_absolute_error
+mean_absolute_error(y, predicted)
+
+# we can also use lib for calculating MSE
+from sklearn.metrics import mean_squared_error
+mean_squared_error(y, predicted)
+
+# we can also use lib for calculating R - Square Error
+from sklearn.metrics import r2_score
+r2_score(y, predicted)
+
+# drwing the best fit line
+plt.xlabel('Year')
+plt.ylabel('Annual Temperature')
+plt.scatter(x, y, label = 'actual', color = 'r')
+plt.plot(x, predicted, label = 'predicted', color = 'b')
+
+# drawing the best fit line using seaborn lib
+sns.regplot(x='YEAR', y='ANNUAL', data=df)
+
+
+
+############################################################# Assignment 3 = Classification Technique ##############################################################
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+df = pd.read_csv('/content/Admission_Predict.csv')
+
+df.head()
+
+df.shape
+
+df.dtypes
+
+df.columns
+
+from sklearn.preprocessing import Binarizer
+
+bi = Binarizer(threshold=0.75)
+df['Chance of Admit '] = bi.fit_transform(df[['Chance of Admit ']])
+
+df.head()
+
+x = df.drop('Chance of Admit ', axis = 1)
+y = df['Chance of Admit ']
+
+y = y.astype('int')
+
+y
+
+x
+
+sns.countplot(x = y)
+
+y.value_counts()
+
+# Cross Validation
+from sklearn.model_selection import train_test_split
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0, train_size=0.75)
+
+x_train.shape
+
+x_test.shape
+
+from sklearn.tree import DecisionTreeClassifier
+
+classifier = DecisionTreeClassifier(random_state=0)
+
+classifier.fit(x_train,y_train)
+
+y_pred = classifier.predict(x_test)
+
+from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import classification_report
+
+ConfusionMatrixDisplay.from_predictions(y_test,y_pred)
+
+print(classification_report(y_test,y_pred))
+
+from sklearn.metrics import accuracy_score
+accuracy_score(y_test, y_pred)
+
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(18,9))
+plot_tree(classifier, fontsize=8, filled=True,
+          feature_names=x.columns, class_names=['NA', 'AD']);
+
+############################################################# Assignment 4 = Spam and Ham ##########################################################################
+
+import pandas as pd
+
+df = pd.read_csv('/content/SMSSpamCollection', sep='\t',
+                 names=['label','text'])
+
+df.head()
+
+df.shape
+
+!pip install nltk
+
+import nltk
+
+nltk.download('stopwords')
+nltk.download('punkt')
+
+sentence = "Hello frineds!, how are you."
+
+# tokenize the content
+# it is nothing but seperating the whole line into parts
+from nltk.tokenize import word_tokenize
+word_tokenize(sentence)
+
+# Now,
+# Removing all the stopwords
+from nltk.corpus import stopwords
+
+swords = stopwords.words('english')
+
+clean = [word for word in word_tokenize(sentence) if word not  in swords ]
+
+print(clean)
+
+from nltk.stem import PorterStemmer
+ps = PorterStemmer()
+clean = [ps.stem(word) for word in word_tokenize(sentence)
+            if word not in swords]
+
+print(clean)
+
+sent = "Hello friends! How are you? We will be learning Python today"
+
+"""# We can also make a function to clean the data"""
+
+# here we can also make a function to clean the data
+def clean_text(sentence):
+  # This will tokenize the sentence
+  token = word_tokenize(sentence)
+  # This will remove stopwords from the sentence
+  clean = [word for word in token
+           if word.isdigit or word.isalpha]
+  # This will remove the stem words(postfix from the word)
+  clean = [ps.stem(word) for word in token
+           if word not in swords]
+  return clean
+
+clean_text(sent)
+
+"""# Preprocessing
+# Coverting Charecter to Numeric value using TF-IDF Vectorize
+"""
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+tfidf = TfidfVectorizer(analyzer=clean_text)
+
+x = df['text']
+y = df['label']
+
+x_new = tfidf.fit_transform(x)
+
+x.shape
+
+x_new.shape
+
+y.value_counts()
+
+from sklearn.model_selection import train_test_split
+
+x_train, x_test, y_train, y_test = train_test_split(
+    x_new, y, random_state = 0, test_size = 0.25)
+
+x_train.shape
+
+x_test.shape
+
+"""# Naive_Bayes Classifier
+
+"""
+
+from sklearn.naive_bayes import GaussianNB
+
+nb = GaussianNB()
+
+nb.fit(x_train.toarray(),y_train)
+
+y_pred = nb.predict(x_test.toarray())
+
+y_test.value_counts()
+
+from sklearn.metrics import ConfusionMatrixDisplay
+ConfusionMatrixDisplay.from_predictions(y_test,y_pred)
+
+from sklearn.metrics import classification_report
+print(classification_report(y_test,y_pred))
+
+from sklearn.metrics import accuracy_score
+accuracy_score(y_test,y_pred)
+
+"""#         RandomForest Classifier"""
+
+from sklearn.ensemble import RandomForestClassifier
+rf = RandomForestClassifier(random_state=0)
+
+rf.fit(x_train, y_train)
+
+y_pred = rf.predict(x_test)
+
+ConfusionMatrixDisplay.from_predictions(y_test, y_pred)
+
+print(classification_report(y_test, y_pred))
+
+accuracy_score(y_test,y_pred)
+
+"""# Logistic Regression"""
+
+from sklearn.linear_model import LogisticRegression
+log = LogisticRegression()
+
+log.fit(x_train, y_train)
+
+y_pred = log.predict(x_test)
+
+print(classification_report(y_test, y_pred))
+
+accuracy_score(y_test, y_pred)
+
+"""# Hyper Parameter Tuning"""
+
+from sklearn.model_selection import GridSearchCV
+
+params = {
+    'criterion':['gini','entropy'],
+    'max_features':['sqrt','log2'],
+    'random_state':[0,1,2,3,4],
+    'class_weight':['balanced','balanced_subsample']
+}
+
+grid = GridSearchCV(rf, param_grid=params, cv=5, scoring='accuracy')
+
+grid.fit(x_train, y_train)
+
+rf = grid.best_estimator_
+
+y_pred = rf.predict = (x_test)
+
+accuracy_score(y_test,y_pred)
+
+
+
+
+############################################################# Assignment 5 = Clustering ############################################################################
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('/content/Mall_Customers.csv')
+
+df.head()
+
+df.shape
+
+df.columns
+
+df.dtypes
+
+df.isnull().sum()
+
+x = df.iloc[:,3:]
+
+x
+
+plt.title('Uncluster Data')
+plt.xlabel('Annual Income')
+plt.ylabel('Spending Score')
+plt.scatter(x['Annual Income (k$)'], x['Spending Score (1-100)'])
+
+"""# 1. Method Elbow Method KMeans Algorithm"""
+
+from sklearn.cluster import KMeans, AgglomerativeClustering
+
+# passing how many cluster you want to create
+km = KMeans(n_clusters=3)
+
+x.shape
+
+km.fit_predict(x)
+
+# Sum Square Error(SSE)
+km.inertia_
+
+sse = []
+for k in range(1,16):
+  km = KMeans(n_clusters=k)
+  km.fit_predict(x)
+  sse.append(km.inertia_)
+
+sse
+
+plt.title('Elbow - Metod')
+plt.xlabel('value of "k"')
+plt.ylabel('SSE')
+plt.grid()
+plt.xticks(range(2,16))
+plt.plot(range(1,16), sse, marker='.', color='blue')
+
+"""# 2. Method Silhoute Score"""
+
+from sklearn.metrics import silhouette_score
+
+silh = []
+for k in range(2,16):
+  km = KMeans(n_clusters=k)
+  labels = km.fit_predict(x)
+  score = silhouette_score(x, labels)
+  silh.append(score)
+
+silh
+
+plt.title('Silhoutte - Metod')
+plt.xlabel('value of "k"')
+plt.ylabel('Silhoutte Score')
+plt.grid()
+plt.xticks(range(2,16))
+plt.bar(range(2,16), silh, color='red')
+
+km = KMeans(n_clusters=5)
+
+labels = km.fit_predict(x)
+
+labels
+
+km.cluster_centers_
+
+cent = km.cluster_centers_
+
+plt.figure(figsize=(16,9))
+plt.subplot(1,2,1)
+plt.title('Uncluster Data')
+plt.xlabel('Annual Income')
+plt.ylabel('Spending Score')
+plt.scatter(x['Annual Income (k$)'], x['Spending Score (1-100)'])
+
+plt.subplot(1,2,2)
+plt.title('Clustered Data')
+plt.xlabel('Annual Income')
+plt.ylabel('Spending Score')
+plt.scatter(x['Annual Income (k$)'], x['Spending Score (1-100)'], c=labels)
+plt.scatter(cent[:,0], cent[:,1], s=100, color='black')
+
+# this is cluster 4
+cluster_4 = df[labels==4]
+cluster_4
+
+km.predict([[56,61]])
+
+
+
+
+############################################################# Assignment 6 = Accociation Rules #####################################################################
+
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[2]:
+
+
+get_ipython().system('pip install mlxtend')
+
+
+# In[3]:
+
+
+import csv
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+
+
+# In[5]:
+
+
+dataset=[]
+with open("Market_Basket_Optimisation.csv") as file:
+    reader = csv.reader(file, delimiter=",")
+    for row in reader:
+        dataset = dataset + [row]
+
+
+# In[6]:
+
+
+dataset
+
+
+# In[7]:
+
+
+len(dataset)
+
+
+# In[8]:
+
+
+# using TransactionEncoder
+te = TransactionEncoder()
+x = te.fit_transform(dataset)
+
+
+# In[9]:
+
+
+x
+
+
+# In[11]:
+
+
+te.columns_
+
+
+# In[12]:
+
+
+len(te.columns_)
+
+
+# In[14]:
+
+
+import pandas as pd
+df = pd.DataFrame(x, columns=te.columns_)
+
+
+# In[16]:
+
+
+df.head()
+
+
+# In[17]:
+
+
+# apriori algorithm
+freq_itemset = apriori(df, min_support=0.01, use_colnames=te.columns_)
+
+
+# In[18]:
+
+
+freq_itemset
+
+
+# In[42]:
+
+
+# using association_rules
+rules = association_rules(freq_itemset, metric='confidence', min_threshold=0.25)
+
+
+# In[43]:
+
+
+rules
+
+
+# In[44]:
+
+
+rules = rules[['antecedents','consequents','support','confidence']]
+
+
+# In[45]:
+
+
+rules.head()
+
+
+# In[46]:
+
+
+rules[rules['antecedents'] == {'cake'}]['consequents']
+
+
+
+############################################################# Assignment 7 = Mulilayer Neural Network ##############################################################
+
+import numpy as np
+
+df = np.loadtxt('https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv'
+                , delimiter = ',')
+
+df
+
+df.shape
+
+# input data
+x = df[:,:8]
+
+# output data
+y = df[:,8]
+
+x
+
+y
+
+# For counting 1:(+ve) and 0:(-ve) for diabeties
+from collections import Counter
+Counter(y)
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+model = Sequential()
+
+# input layer
+model.add(Dense(12, input_dim=8, activation='relu'))
+
+# hidden layer
+model.add(Dense(8, activation='relu'))
+model.add(Dense(8, activation='relu'))
+
+# outout layer
+# sigmoid is for binary classification
+# softmax is for multi-class classification
+model.add(Dense(1, activation='sigmoid'))
+
+model.compile(loss='binary_crossentropy', optimizer='adam',
+              metrics=['accuracy'])
+
+# Train the model
+model.fit(x, y, epochs=100, batch_size=10)
+
+# Evaluate the model
+model.evaluate(x,y)
+
+model.summary()
+
+###########################################################################################################################################################
+###########################################################################################################################################################
+###########################################################################################################################################################
+###########################################################################################################################################################
+###########################################################################################################################################################
+###########################################################################################################################################################
+###########################################################################################################################################################
+###########################################################################################################################################################
+###########################################################################################################################################################
+						=================== DAA 1 =================
+#include<iostream>
+using namespace std;
+
+void knap(int num, float pt[], float wt[], float capacity){
+    float remainingCapacity = capacity;
+    float solution[num];
+    float total_weight = 0.0;
+    float total_profit = 0.0;
+    for (int i = 0; i < num; i++)
+    {
+        solution[i]=0.0;
+    }
+    for (int i = 0; i < num; i++)
+    {
+        if (wt[i]<=remainingCapacity)
+        {
+            solution[i]=1.0;
+            remainingCapacity -= wt[i];
+        }
+        else{
+            solution[i] = remainingCapacity/wt[i];
+        }
+        
+    }
+    
+    for (int i = 0; i < num; i++)
+    {
+        pt[i] *= solution[i];
+        wt[i] *= solution[i];
+    }
+    for (int i = 0; i < num; i++)
+    {
+        total_profit += pt[i];
+        total_weight += wt[i];
+    }
+    
+    cout<<"\nTotal profit : "<<total_profit;
+    cout<<"\nTotal weight : "<<total_weight;
+}
+
+int main(){
+    int num;
+    cout<<"Enter number of items : ";
+    cin>>num;
+
+    float pt[num];
+    cout<<"Enter profits : ";
+    for (int i = 0; i < num; i++)
+    {
+        cin>>pt[i];
+    }
+
+    float wt[num];
+    cout<<"Enter weights : ";
+    for (int i = 0; i < num; i++)
+    {
+        cin>>wt[i];
+    }
+    
+    float profit_weight[num];
+    for (int i = 0; i < num; i++)
+    {
+        profit_weight[i] = pt[i]/wt[i];
+    }
+    //sorting in decending order
+    float temp;
+    for (int i = 0; i < num-1; i++)
+    {
+        for (int j = 0; j < num-i-1; j++)
+        {
+            if (profit_weight[j]<profit_weight[j+1])
+            {
+                temp = profit_weight[j];
+                profit_weight[j] = profit_weight[j+1];
+                profit_weight[j+1] = temp;
+
+                temp = pt[j];
+                pt[j] = pt[j+1];
+                pt[j+1] = temp;
+
+                temp = wt[j];
+                wt[j] = wt[j+1];
+                wt[j+1] = temp;
+
+            }
+            
+        }
+        
+    }
+    cout<<"\n| Ii  | pt | wt | pt/wt |"<<endl;
+    for (int i = 0; i < num; i++)
+    {
+        cout<<"| I-"<<i+1<<" | "<<pt[i]<<"  | "<<wt[i]<<"  |   "<<profit_weight[i]<<"  | "<<endl;
+    }
+    float capacity;
+    cout<<"\nEnter capacity : ";
+    cin>>capacity;
+    knap(num,pt,wt,capacity);
+
+    return 0;
+}
+/*
+--------- output ---------
+Enter number of items : 5
+Enter profits : 10 15 10 12 8
+Enter weights : 3 3 2 5 1
+
+| Ii  | pt | wt | pt/wt |       
+| I-1 | 8  | 1  |   8  |        
+| I-2 | 15 | 3  |   5  |       
+| I-3 | 10 | 2  |   5  |       
+| I-4 | 10 | 3  | 3.3  | 
+| I-5 | 12 | 5  | 2.4  |     
+
+Enter capacity : 10
+
+Total profit : 45.4
+Total weight : 10
+*/
+###########################################################################################################################################################
+###########################################################################################################################################################
+						------------------- DAA 1.1 ----------------------
+#include<iostream>
+using namespace std;
+
+int knap(int num, int pt[], int wt[], int cap){
+    int dp[num+1][cap+1];
+    for (int i = 0; i <= num; i++)
+    {
+        for (int j = 0; j <= cap; j++)
+        {
+            if (i==0||j==0)
+            {
+                dp[i][j] = 0;
+            }
+            else if (wt[i-1]<=j)
+            {
+                dp[i][j] = max(pt[i-1]+dp[i-1][j-wt[i-1]], dp[i-1][j]);
+            }
+            else{
+                dp[i][j] = dp[i-1][j];
+            }            
+            
+        }
+        
+    }
+    for (int i = 0; i <= num; i++)
+    {
+        for (int j = 0; j <= cap; j++)
+        {
+            cout<<dp[i][j]<<"\t";
+        }
+        cout<<"\n\n";
+    }
+    
+    return dp[num][cap];
+}
+
+int main(){
+
+    int num;
+    cout<<"Enter number of items : ";
+    cin>>num;
+
+    int pt[num];
+    cout<<"Enter profits : ";
+    for (int i = 0; i < num; i++)
+    {
+        cin>>pt[i];
+    }
+    
+    int wt[num];
+    cout<<"Enter weights : ";
+    for (int i = 0; i < num; i++)
+    {
+        cin>>wt[i];
+    }
+
+    int capacity;
+    cout<<"Enter capacity : ";
+    cin>>capacity;
+
+    int result = knap(num,pt,wt,capacity);
+    cout<<"\nMaximum profit : "<<result;
+    return 0;
+}
+/*
+------------ output ----------
+Enter number of items : 4
+Enter profits : 2 4 7 10
+Enter weights : 1 3 5 7
+Enter capacity : 8
+0       0       0       0       0       0       0       0       0
+
+0       2       2       2       2       2       2       2       2
+
+0       2       2       4       6       6       6       6       6
+
+0       2       2       4       6       7       9       9       11
+
+0       2       2       4       6       7       9       10      12
+
+
+Maximum profit : 12
+*/
+###########################################################################################################################################################
+###########################################################################################################################################################
+					-----------------  DAA - 2 -----------------
+#include<iostream>
+#include<climits>
+using namespace std;
+
+struct Edges{
+    int source, destination, weight; // Corrected the member name from 'distination' to 'destination'
+};
+
+void bell(Edges edges[], int V, int E, int source){
+
+    int distance[V];
+    for (int i = 0; i < V; i++)
+    {
+        distance[i] = INT_MAX;
+    }
+    distance[source] = 0;
+    for (int i = 0; i < V; i++)
+    {
+        for (int j = 0; j < E; j++)
+        {
+            int u = edges[j].source;
+            int v = edges[j].destination;
+            int w = edges[j].weight;
+
+            if (distance[u]!=INT_MAX && distance[u]+w < distance[v])
+            {
+                distance[v] = distance[u] + w;
+            }
+             
+        }
+        
+    }
+    
+    for (int j = 0; j < E; j++)
+    {
+        int u = edges[j].source;
+        int v = edges[j].destination;
+        int w = edges[j].weight;
+
+        if (distance[u]!=INT_MAX && distance[u]+w < distance[v])
+        {
+            cout<<"There is -ve weight edge cycle"<<endl;
+            return;
+        }
+             
+    }
+
+    cout<<"| Vertices | Distance |"<<endl;
+    for (int i = 0; i < V; i++)
+    {
+        cout<<i<<"  "<<distance[i]<<endl;
+    }
+}
+
+int main(){
+    int V;
+    cout<<"Enter number of vertices : ";
+    cin>>V;
+
+    int E;
+    cout<<"Enter number of edges : ";
+    cin>>E;
+
+    Edges edges[E];
+
+    for (int i = 0; i < E; i++)
+    {
+        cout<<" ------ "<<endl;
+        cout<<"Edge - '"<<i<<"' Enter source : ";
+        cin>>edges[i].source;
+        cout<<"Edge - '"<<i<<"' Enter destination : "; // Corrected from 'distination' to 'destination'
+        cin>>edges[i].destination; // Corrected from 'distination' to 'destination'
+        cout<<"Edge - '"<<i<<"' Enter weight : ";
+        cin>>edges[i].weight;
+    }
+
+    int source;
+    cout<<"Enter source : ";
+    cin>>source;
+    
+    bell(edges,V,E,source);
+
+    return 0;
+}
+/*
+----------- output -------------
+Enter number of vertices : 5
+Enter number of edges : 8
+ ------
+Edge - '0' Enter source : 0
+Edge - '0' Enter destination : 1
+Edge - '0' Enter weight : -1
+ ------
+Edge - '1' Enter source : 0
+Edge - '1' Enter destination : 2
+Edge - '1' Enter weight : 4
+ ------ 
+Edge - '2' Enter source : 1 
+Edge - '2' Enter destination : 2
+Edge - '2' Enter weight : 3
+ ------ 
+Edge - '3' Enter source : 1
+Edge - '3' Enter destination : 3
+Edge - '3' Enter weight : 2
+ ------ 
+Edge - '4' Enter source : 1
+Edge - '4' Enter destination : 4
+Edge - '4' Enter weight : 2
+ ------ 
+Edge - '5' Enter source : 3
+Edge - '5' Enter destination : 2
+Edge - '5' Enter weight : 5
+ ------ 
+Edge - '6' Enter source : 3
+Edge - '6' Enter destination : 1
+Edge - '6' Enter weight : 1
+ ------
+Edge - '7' Enter source : 4
+Edge - '7' Enter destination : 3
+Edge - '7' Enter weight : -3
+Enter source : 0
+| Vertices | Distance |
+    0           0
+    1          -1
+    2           2
+    3          -2
+    4           1
+*/
+###########################################################################################################################################################
+###########################################################################################################################################################
+						----------------- DAA - 3 ------------------
+#include<iostream>
+using namespace std;
+
+int x[20];
+int count;
+
+void print(int num){
+    cout<<"\n\n"<<"Solution : "<<++count<<"\n\n";
+    for (int i = 1; i <= num; i++)
+    {
+        cout<<"\t"<<i;
+    }
+    for (int i = 1; i <= num; i++)
+    {
+        cout<<"\n\n"<<i;
+        for (int j = 1; j <= num; j++)
+        {
+            if (x[i]==j)
+            {
+                cout<<"\tQ";
+            }
+            else{
+                cout<<"\t-";
+            }
+            
+        }
+        cout<<endl;
+    }
+    
+}
+
+int place(int row, int column){
+    for (int i = 1; i < row; i++)
+    {
+        if (x[i]==column || abs(x[i]-column)==abs(i-row))
+        {
+            return 0;   
+        }
+        
+    }
+    return 1;
+}
+
+void Queen(int row, int num){
+    int column;
+    for (column = 1; column <= num; column++)
+    {
+        if (place(row,column))
+        {
+            x[row] = column;
+            if (row==num)
+            {
+                print(num);
+            }
+            else{
+                Queen(row+1,num);
+            }
+        }
+        
+    }
+    
+}
+
+int main(){
+    int num;
+    cout<<"Enter number of Queens : ";
+    cin>>num;
+    Queen(1,num);
+    return 0;
+}
+
+/*
+---------- output -------------
+Enter number of Queens : 4
+
+
+Solution : 1
+
+        1       2       3       4
+
+1       -       Q       -       -
+
+
+2       -       -       -       Q
+
+
+3       Q       -       -       -
+
+
+4       -       -       Q       -
+
+
+Solution : 2
+
+        1       2       3       4
+
+1       -       -       Q       -
+
+
+2       Q       -       -       -
+
+
+3       -       -       -       Q
+
+
+4       -       Q       -       -
+
+---------- ---------- ---------- -------
+
+Enter number of Queens : 6
+
+
+Solution : 1
+
+        1       2       3       4       5       6
+
+1       -       Q       -       -       -       -
+
+
+2       -       -       -       Q       -       -
+
+
+3       -       -       -       -       -       Q
+
+
+4       Q       -       -       -       -       -
+
+
+5       -       -       Q       -       -       -
+
+
+6       -       -       -       -       Q       -
+
+
+Solution : 2
+
+        1       2       3       4       5       6
+
+1       -       -       Q       -       -       -
+
+
+2       -       -       -       -       -       Q
+
+
+3       -       Q       -       -       -       -
+
+
+4       -       -       -       -       Q       -
+
+
+5       Q       -       -       -       -       -
+
+
+6       -       -       -       Q       -       -
+
+
+Solution : 3
+
+        1       2       3       4       5       6
+
+1       -       -       -       Q       -       -
+
+
+2       Q       -       -       -       -       -
+
+
+3       -       -       -       -       Q       -
+
+
+4       -       Q       -       -       -       -
+
+
+5       -       -       -       -       -       Q
+
+
+6       -       -       Q       -       -       -
+
+
+Solution : 4
+
+        1       2       3       4       5       6
+
+1       -       -       -       -       Q       -
+
+
+2       -       -       Q       -       -       -
+
+
+3       Q       -       -       -       -       -
+
+
+4       -       -       -       -       -       Q
+
+
+5       -       -       -       Q       -       -
+
+
+6       -       Q       -       -       -       -
+
+*/
+###########################################################################################################################################################
+###########################################################################################################################################################
+						----------------- DAA - 4 ------------------
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int INF = INT_MAX;
+
+// Function to reduce rows and columns in the cost matrix
+void reduceMatrix(vector<vector<int>>& costMatrix) {
+    int n = costMatrix.size();
+
+    // Reduce rows
+    for (int i = 0; i < n; i++) {
+        int minVal = INF;
+        for (int j = 0; j < n; j++) {
+            if (costMatrix[i][j] < minVal) {
+                minVal = costMatrix[i][j];
+            }
+        }
+        if (minVal != INF) {
+            for (int j = 0; j < n; j++) {
+                if (costMatrix[i][j] != INF) {
+                    costMatrix[i][j] -= minVal;
+                }
+            }
+        }
+    }
+
+    // Reduce columns
+    for (int j = 0; j < n; j++) {
+        int minVal = INF;
+        for (int i = 0; i < n; i++) {
+            if (costMatrix[i][j] < minVal) {
+                minVal = costMatrix[i][j];
+            }
+        }
+        if (minVal != INF) {
+            for (int i = 0; i < n; i++) {
+                if (costMatrix[i][j] != INF) {
+                    costMatrix[i][j] -= minVal;
+                }
+            }
+        }
+    }
+}
+
+// Branch and Bound function
+void branchAndBoundTSP(vector<vector<int>>& costMatrix, int& minCost, int level, int pathLength, vector<int>& path, vector<int>& minPath) {
+    int n = costMatrix.size();
+
+    if (level == n) {
+        // All cities have been visited
+        pathLength += costMatrix[path[level - 1]][path[0]];
+        if (pathLength < minCost) {
+            minCost = pathLength;
+            minPath = path;
+        }
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (costMatrix[path[level - 1]][i] != INF) {
+            if (find(path.begin(), path.end(), i) == path.end()) {
+                int temp = costMatrix[path[level - 1]][i];
+                pathLength += temp;
+
+                if (pathLength + (n - level) * temp < minCost) {
+                    path[level] = i;
+                    branchAndBoundTSP(costMatrix, minCost, level + 1, pathLength, path, minPath);
+                }
+
+                pathLength -= temp;
+            }
+        }
+    }
+}
+
+int main() {
+
+    int n;  // Number of cities
+    cout << "Enter the number of cities: ";
+    cin >> n;
+
+    vector<vector<int>> costMatrix(n, vector<int>(n));
+
+    cout << "Enter the cost matrix (use 0 for unconnected cities):\n";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cin >> costMatrix[i][j];
+            if (costMatrix[i][j] == 0) {
+                costMatrix[i][j] = INF;
+            }
+        }
+    }
+
+    vector<int> path(n);
+    vector<int> minPath(n);
+    int minCost = INF;
+
+    reduceMatrix(costMatrix);
+    path[0] = 0;  // Starting from city 0
+    branchAndBoundTSP(costMatrix, minCost, 1, 0, path, minPath);
+
+    cout << "Optimal TSP tour: ";
+    for (int i = 0; i < n; i++) {
+        cout << minPath[i] << " -> ";
+    }
+    cout << minPath[0] << endl;
+
+    cout << "Minimum cost: " << minCost << endl;
+
+    return 0;
+}
+
+/*
+
+Enter the number of cities: 4
+Enter the cost matrix (use 0 for unconnected cities):
+0
+10
+15
+20
+10
+0
+35
+25
+15
+35
+0
+30
+20
+25
+30
+0
+Optimal TSP tour: 0 -> 1 -> 2 -> 3 -> 0
+Minimum cost: 25
+
+*/
+###########################################################################################################################################################
+###########################################################################################################################################################
